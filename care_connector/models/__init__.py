@@ -1,0 +1,1 @@
+from . import product_template,account_move,res_partner
