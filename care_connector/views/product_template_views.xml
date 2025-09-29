@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="matrix_product_template_only_form_view_inherit" model="ir.ui.view">
+        <field name="name">product.template.form.view.inherit.matrix</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"></field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='default_code']" position="after">
+<!--                <field name="care_product_id" invisible="1"/>-->
+                <field name="care_product_id" readonly="1"/>
+
+            </xpath>
+        </field>
+    </record>
+</odoo>
