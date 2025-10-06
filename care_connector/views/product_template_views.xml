@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='default_code']" position="after">
 <!--                <field name="care_product_id" invisible="1"/>-->
-                <field name="care_product_id" readonly="1"/>
+                <field name="x_care_id" readonly="1"/>
 
             </xpath>
         </field>

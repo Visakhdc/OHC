@@ -6,7 +6,7 @@
     "website": "https://www.icodebees.com/",
     "author": "iCodeBees Private Limited",
     "installable": True,
-    "depends": ["base","stock","web"],
+    "depends": ["base","stock","web","contacts","account"],
     "data": [
         "views/account_move_views.xml",
         "views/product_template_views.xml",
