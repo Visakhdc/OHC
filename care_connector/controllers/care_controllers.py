@@ -31,7 +31,7 @@ class CareIntegrationController(http.Controller):
                                 'product_id': product.id,
                                 'quantity': line.get('quantity', 1),
                                 'price_unit': line.get('sale_price', 0.0),
-                                'care_ml_ref': line.get('care_line_ref'),
+                                'x_care_id': line.get('x_care_id'),
                             }))
 
                     if partner_id and invoice_lines:
@@ -42,7 +42,7 @@ class CareIntegrationController(http.Controller):
                         move = user_env['account.move'].create({
                             'move_type': move_type,
                             'partner_id': partner_id.id,
-                            'care_inv_ref': data['care_inv_ref'],
+                            'x_care_id': data['x_care_id'],
                             'invoice_date': invoice_date,
                             'invoice_line_ids': invoice_lines,
                         })
@@ -77,7 +77,7 @@ class CareIntegrationController(http.Controller):
 
     def get_or_create_partner(self,partner_data,user_env):
         """Find partner by care_partner_id, else create one with care_partner_id."""
-        res_partner_id = user_env['res.partner'].search([('care_partner_id', '=', partner_data['care_pid'])], limit=1)
+        res_partner_id = user_env['res.partner'].search([('x_care_id', '=', partner_data['x_care_id'])], limit=1)
         if not res_partner_id:
             country = request.env['res.country'].search([('code', '=', 'IN')], limit=1)  # India
 
@@ -87,7 +87,7 @@ class CareIntegrationController(http.Controller):
             ], limit=1)
             res_partner_id = res_partner_id.create({
                 'name': partner_data['name'],
-                'care_partner_id': partner_data['care_pid'],
+                'x_care_id': partner_data['x_care_id'],
                 'company_type': partner_data['partner_type'],
                 'email': partner_data['email'],
                 'phone': partner_data['phone'],
@@ -100,7 +100,7 @@ class CareIntegrationController(http.Controller):
         """Find product by care_product_id, else create one with care_product_id."""
         Product = user_env['product.product']
         Category = user_env['product.category']
-        product = Product.search([('care_product_id', '=', product_data['care_product_id'])], limit=1)
+        product = Product.search([('x_care_id', '=', product_data['x_care_id'])], limit=1)
 
         if not product:
             category_name = product_data.get('category', 'All Products')
@@ -110,7 +110,7 @@ class CareIntegrationController(http.Controller):
 
             product = Product.create({
                 'name': product_data.get('product_name', 'New Product'),
-                'care_product_id': product_data['care_product_id'],
+                'x_care_id': product_data['x_care_id'],
                 'list_price': product_data.get('mrp', 0.0),
                 'standard_price': product_data.get('cost', 0.0),
                 'categ_id': category.id,
