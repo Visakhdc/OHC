@@ -65,6 +65,104 @@ class CareIntegrationController(http.Controller):
             return Response(json.dumps({"error": "Invalid credentials format"}),
                             status=401, mimetype="application/json")
 
+    @http.route('/api/add_product', type='json', auth='public', methods=['POST'], csrf=False)
+    def create_update_product(self, **kwargs):
+        try:
+            auth_header = request.httprequest.headers.get("Authorization")
+            if not auth_header or not auth_header.startswith("Basic "):
+                return Response(json.dumps({"error": "Missing or invalid Authorization header"}),
+                                status=401, mimetype="application/json")
+            auth_user = self.get_authenticated_user(auth_header)
+            if not auth_user:
+                return Response(
+                    json.dumps({"error": "Authentication failed"}),
+                    status=403, mimetype="application/json"
+                )
+
+            created_products = []
+            errors = []
+            user_env = request.env(user=auth_user, su=True)
+            data = json.loads(request.httprequest.data)
+
+            for product_data in data["products"]:
+                try:
+                    product_id = self.get_or_create_product(product_data, user_env)
+                    created_products.append({
+                        "product_id": product_id.id,
+                        "product_name": product_id.name,
+                        "x_care_id": product_id.x_care_id,
+                    })
+                except Exception as e:
+                    errors.append({
+                        "product_data": product_data,
+                        "error": str(e)
+                    })
+
+            response_data = {
+                "status": "success",
+                "created": len(created_products),
+                "errors": len(errors),
+                "products": created_products,
+                "error_details": errors
+            }
+
+            return Response(json.dumps(response_data), status=200, mimetype="application/json")
+
+        except Exception as e:
+            return Response(
+                json.dumps({"error": f"Server error: {str(e)}"}),
+                status=500, mimetype="application/json"
+            )
+
+    @http.route('/api/add_partners', type='json', auth='public', methods=['POST'], csrf=False)
+    def create_update_partner(self, **kwargs):
+        try:
+            auth_header = request.httprequest.headers.get("Authorization")
+            if not auth_header or not auth_header.startswith("Basic "):
+                return Response(json.dumps({"error": "Missing or invalid Authorization header"}),
+                                status=401, mimetype="application/json")
+            auth_user = self.get_authenticated_user(auth_header)
+            if not auth_user:
+                return Response(
+                    json.dumps({"error": "Authentication failed"}),
+                    status=403, mimetype="application/json"
+                )
+
+            created_partner = []
+            errors = []
+            user_env = request.env(user=auth_user, su=True)
+            data = json.loads(request.httprequest.data)
+
+            for partner_data in data["partners"]:
+                try:
+                    partner_id = self.get_or_create_partner(partner_data, user_env)
+                    created_partner.append({
+                        "product_id": partner_id.id,
+                        "product_name": partner_id.name,
+                        "x_care_id": partner_id.x_care_id,
+                    })
+                except Exception as e:
+                    errors.append({
+                        "product_data": partner_data,
+                        "error": str(e)
+                    })
+
+            response_data = {
+                "status": "success",
+                "created": len(created_partner),
+                "errors": len(errors),
+                "products": created_partner,
+                "error_details": errors
+            }
+
+            return Response(json.dumps(response_data), status=200, mimetype="application/json")
+
+        except Exception as e:
+            return Response(
+                json.dumps({"error": f"Server error: {str(e)}"}),
+                status=500, mimetype="application/json"
+            )
+
 
     def get_authenticated_user(self,header):
         auth_decoded = base64.b64decode(header.split(" ")[1]).decode("utf-8")
