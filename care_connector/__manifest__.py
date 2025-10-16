@@ -7,6 +7,9 @@
     "author": "iCodeBees Private Limited",
     "installable": True,
     "depends": ["base","stock","web","contacts","account"],
+    'external_dependencies': {
+            'python': ['pydantic'],
+        },
     "data": [
         "views/account_move_views.xml",
         "views/product_template_views.xml",
