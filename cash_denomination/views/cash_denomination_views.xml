@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <record id="view_cash_denomination_list" model="ir.ui.view">
+      <field name="name">cash.denomination.list</field>
+      <field name="model">cash.denomination</field>
+      <field name="arch" type="xml">
+        <list string="Cash Denominations">
+          <field name="date"/>
+          <field name="user"/> 
+          <field name="counter"/>
+          <field name="grand_total"/>
+        </list>
+      </field>
+    </record>
+
+    <record id="view_cash_denomination_form" model="ir.ui.view">
+      <field name="name">cash.denomination.form</field>
+      <field name="model">cash.denomination</field>
+      <field name="arch" type="xml">
+        <form string="Cash Denomination">
+          <sheet>
+            <group>
+              <group>
+                <field name="date"/>
+                <field name="user"/>
+              </group>
+              <group>
+                <field name="counter"/>
+              </group>
+            </group>
+            <notebook>
+              <page string="Cash Denomination">
+                <field name="line_ids">
+                  <list editable="top">
+                    <field name="counts"/>
+                    <field name="currency"/>
+                    <field name="sub_total"/>
+                  </list>
+                </field>
+              </page>
+                <page string="Cash Transfers">
+                    <field name="transfer_line_ids">
+                        <list editable="bottom">
+                            <field name="from_counter"/>
+                            <field name="to_counter"/>
+                            <field name="to_user"/>
+                            <field name="amount"/>
+                            <field name="remarks"/>
+                            <field name="transfer_date"/>
+                        </list>
+                    </field>
+                </page>
+            </notebook>
+
+            <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 10px; gap: 8px; margin-left:1350px">
+              <span style="font-weight: bold; font-size: 16px;">Total:</span>
+              <field name="grand_total" readonly="1" class="o_field_number o_field_number_currency" style="font-weight: bold; font-size: 16px; width: 120px;"/>
+            </div>
+
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="action_cash_denomination" model="ir.actions.act_window">
+      <field name="name">Cash Denomination</field>
+      <field name="res_model">cash.denomination</field>
+      <field name="view_mode">list,form</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+                Create your first cash denomination record
+        </p>
+      </field>
+    </record>
+
+    <menuitem id="menu_cash_denomination" name="Cash Denomination" parent="account.menu_finance" action="action_cash_denomination" sequence="9"/>
+  </data>
+</odoo>

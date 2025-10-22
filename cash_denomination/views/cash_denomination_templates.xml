@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="website_menu_cash_denomination" model="website.menu">
+        <field name="name">Cash Denomination</field>
+        <field name="url">/cash/denomination</field>
+        <field name="sequence">20</field>
+        <field name="parent_id" ref="website.main_menu"/>
+    </record>
+
+    <template id="website_cash_denomination" name="Cash Denomination">
+
+        <t t-call="website.layout">
+            <div id="wrap" class="cash_denomination_template" style="min-height:100vh; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                <section class="container-fluid d-flex justify-content-center align-items-center" style="height:100vh;">
+
+                    <form id="cash_denomination_form" action="/cash/denomination/submit" method="post"
+                          class="p-4 border rounded shadow bg-white" style="max-width:90%; max-height:90%; overflow:auto;">
+
+                        <h1 class="text-center mb-4">Cash Denomination</h1>
+
+                        <div class="row mb-6">
+                            <div class="col-md-2">
+                                <label for="date" class="form-label">Date</label>
+                                <input type="date" name="date" id="date_field" class="form-control" required="required"/>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="person" class="form-label">Person</label>
+                                <input type="text" name="person" class="form-control" t-att-value="request.env.user.name" readonly="readonly"/>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="counter" class="form-label">Counter</label>
+                                <select name="counter" id="counter" class="form-control" required="required">
+                                    <t t-foreach="counters" t-as="ctr">
+                                        <option t-att-value="ctr.id" t-att-selected="ctr.id == selected_counter_id"><t t-esc="ctr.cash_counter"/></option>
+                                    </t>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label">Total Invoiced Cash</label>
+                                <input type="text" class="form-control" t-att-value="total_cash" readonly="readonly"/>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label">Total Cash in Hand</label>
+                                <input type="text" id="cash_in_hand" name="cash_in_hand" class="form-control" t-att-value="cash_in_hand" readonly="readonly"/>
+                            </div>
+
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="button" class="btn" id="cash_transfer" data-bs-toggle="modal" data-bs-target="#transfer-modal" style="background-color: #bcb9bc;">
+                                    Transfer Cash
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <div style="max-height:50vh; overflow-y:auto; margin-top:15px">
+                            <table class="table table-bordered text-center">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Count</th>
+                                        <th>Currency</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="[500,200,100,50,20,10,5,2,1]" t-as="val">
+                                        <td>
+                                            <input type="number" min="0" t-att-name="'counts_%s' % val"
+                                                   class="form-control counts-input" t-att-data-value="val"/>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" t-att-value="val" readonly="readonly"/>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control total-field" readonly="readonly"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="d-flex justify-content-center align-items-center mt-4 position-relative">
+                            <div class="mx-auto">
+                                <button type="submit" class="btn btn-primary px-4">Submit</button>
+                                <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#transfer-details-modal" style="background-color: #bcb9bc;">
+                                    View Transfer Details
+                                </button>
+                            </div>
+
+                            <div class="position-absolute" style="right: 0;">
+                                <strong>Total Amount: </strong>
+                                <input type="text" id="grand_total" name="grand_total"  class="form-control d-inline-block" style="width:150px;" readonly="readonly"/>
+                            </div>
+                        </div>
+
+                    </form>
+                </section>
+            </div>
+
+            <!-- Bootstrap Modal -->
+            <div class="modal fade" id="transfer-modal" tabindex="-1" aria-labelledby="transfer-modal-label" >
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header" >
+                            <h4 class="text-center mb-4" id="transfer-modal-label">Transfer Cash to Another Counter</h4>
+                            <button type="button" class="btn-close btn-close-black" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="transfer_form" action="/cash/transfer/submit" method="post">
+                                <input type="hidden" name="from_counter" id="from_counter"/>
+
+                                <div class="mb-3">
+                                    <label for="to_counter" class="form-label">Transfer To Counter</label>
+                                    <select id="to_counter" name="to_counter" class="form-control" required="required">
+                                        <t t-foreach="to_counter" t-as="ctr">
+                                            <option t-att-value="ctr.id"><t t-esc="ctr.cash_counter"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="transfer_to_user" class="form-label">User</label>
+                                    <select id="transfer_to_user" name="transfer_to_user" class="form-control" required="required">
+                                        <t t-foreach="request.env['res.users'].sudo().search([('id', '!=', request.env.user.id)])" t-as="usr">
+                                            <option t-att-value="usr.id"><t t-esc="usr.name"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="transfer_amount" class="form-label">Amount</label>
+                                    <input type="number" name="transfer_amount" id="transfer_amount" min="1" class="form-control" required="required"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="remarks" class="form-label">Remarks</label>
+                                    <textarea name="remarks" id="remarks" class="form-control" rows="2" placeholder="Optional notes"></textarea>
+                                </div>
+                                <div class="d-flex justify-content-center align-items-center mt-4 position-relative">
+                                    <div class="mx-auto">
+                                        <button type="submit" class="btn btn-primary px-4">Transfer</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transfer Details Modal -->
+            <div class="modal fade" id="transfer-details-modal" tabindex="-1" aria-labelledby="transfer-details-modal-label" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="transfer-details-modal-label">Transfer Details</h4>
+                            <button type="button" class="btn-close btn-close-black" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+
+                            <!-- Outgoing Transfers -->
+                            <h5>Transfers by You</h5>
+                            <table class="table table-bordered table-striped text-center mb-4">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>From Counter</th>
+                                        <th>To Counter</th>
+                                        <th>Amount</th>
+                                        <th>To User</th>
+                                        <th>Remarks</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="outgoing_transfers" t-as="tr">
+                                        <td><t t-esc="tr.from_counter.cash_counter"/></td>
+                                        <td><t t-esc="tr.to_counter.cash_counter"/></td>
+                                        <td><t t-esc="tr.amount"/></td>
+                                        <td><t t-esc="tr.transfer_to_user.name if tr.transfer_to_user else ''"/></td>
+                                        <td><t t-esc="tr.remarks"/></td>
+                                        <td><t t-esc="tr.create_date"/></td>
+                                    </tr>
+                                    <tr t-if="not outgoing_transfers">
+                                        <td colspan="6">No transfers made by you today</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- Incoming Transfers -->
+                            <h5>Transfers to You</h5>
+                            <table class="table table-bordered table-striped text-center">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>From Counter</th>
+                                        <th>From User</th>
+                                        <th>Amount</th>
+                                        <th>Remarks</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="incoming_transfers" t-as="tr">
+                                        <td><t t-esc="tr.from_counter.cash_counter"/></td>
+                                        <td><t t-esc="tr.name.name"/></td>
+                                        <td><t t-esc="tr.amount"/></td>
+                                        <td><t t-esc="tr.remarks"/></td>
+                                        <td><t t-esc="tr.create_date"/></td>
+                                    </tr>
+                                    <tr t-if="not incoming_transfers">
+                                        <td colspan="5">No transfers received today</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
