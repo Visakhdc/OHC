@@ -142,6 +142,7 @@ class AccountUtility:
                 invoice_line_list.append((0, 0, {
                     'product_id': product.id,
                     'quantity': item.quantity,
+                    'received_qty': item.quantity,
                     'price_unit': item.sale_price,
                     'tax_ids': [(6, 0, tax_ids)],
                     'x_care_id': item.x_care_id,
