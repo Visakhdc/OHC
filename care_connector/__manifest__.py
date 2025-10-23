@@ -1,10 +1,8 @@
 {
     "name": "Care Connector",
     "summary": "Integration with OHC software",
-    "version": "18.0.1.0.0",
+    "version": "0.0.1",
     "category": "Uncategorized",
-    "website": "https://www.icodebees.com/",
-    "author": "iCodeBees Private Limited",
     "installable": True,
     "depends": ["base","stock","web","contacts","account"],
     'external_dependencies': {
