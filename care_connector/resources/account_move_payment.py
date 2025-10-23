@@ -9,6 +9,7 @@ class InvoicePaymentUtility:
     def get_or_create_invoice_payment(cls,user_env,request_data):
         try:
             x_care_id = request_data.x_care_id
+            journal_x_care_id = request_data.journal_x_care_id
             amount = request_data.amount
             journal_input = request_data.journal_input.value
             payment_date = request_data.payment_date
@@ -20,6 +21,10 @@ class InvoicePaymentUtility:
             account_payment_model = user_env['account.payment']
             a_p_r_transient_model = user_env['account.payment.register']
 
+            existing_payment = account_payment_model.search([('x_care_id', '=', x_care_id)], limit=1)
+            if existing_payment:
+                raise ValueError(f"'{x_care_id}' already paid")
+
             account_journal = account_journal_model.sudo().search([
                 '|', '|',
                 ('name', 'ilike', journal_input),
@@ -29,7 +34,9 @@ class InvoicePaymentUtility:
 
             if not account_journal:
                 raise ValueError(f"No journal found for '{journal_input}'")
-            existing_invoice = account_move_model.search([('x_care_id', '=', x_care_id)], limit=1)
+            existing_invoice = None
+            if journal_x_care_id:
+                existing_invoice = account_move_model.search([('x_care_id', '=', journal_x_care_id)], limit=1)
 
             if existing_invoice:
                 if existing_invoice.state != 'posted':
@@ -50,6 +57,7 @@ class InvoicePaymentUtility:
                 })._create_payments()
                 if not account_payment:
                     raise ValueError(f"Payment creation failed")
+                account_payment.x_care_id = x_care_id
 
                 return account_payment
 
@@ -66,6 +74,7 @@ class InvoicePaymentUtility:
                     partner_type_str = 'customer'
 
                 payment_vals = {
+                    'x_care_id': x_care_id,
                     'payment_type': payment_type,
                     'partner_type': partner_type_str,
                     'partner_id': partner.id,

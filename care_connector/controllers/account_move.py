@@ -22,7 +22,7 @@ class AccountMove(http.Controller):
             json_response = {
                 "success": True,
                 "message": "Invoice created successfully",
-                "payment": {
+                "invoice": {
                     "id": account_move.id,
                     "name": account_move.name,
                     "partner": account_move.partner_id.name,
@@ -64,7 +64,7 @@ class AccountMove(http.Controller):
             json_response = {
                 "success": True,
                 "message": "Invoice return successfully",
-                "payment": {
+                "reverse_invoice": {
                     "id": account_move.id,
                     "name": account_move.name,
                     "partner": account_move.partner_id.name,
