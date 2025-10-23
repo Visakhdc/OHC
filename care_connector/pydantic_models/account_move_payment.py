@@ -12,6 +12,7 @@ class PartnerType(Enum):
 
 class AccountMovePaymentApiRequest(BaseModel):
     x_care_id: str
+    journal_x_care_id: str
     amount: float = 0.0
     journal_input : JournalType
     payment_date : str
