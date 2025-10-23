@@ -59,11 +59,11 @@ class AccountMove(http.Controller):
             account_move = AccountUtility.get_or_create_account_move_return(user_env, request_data)
 
             if not account_move:
-                raise ValueError("Failed to create or retrieve the Invoice")
+                raise ValueError("Failed to return the Invoice")
 
             json_response = {
                 "success": True,
-                "message": "Invoice created successfully",
+                "message": "Invoice return successfully",
                 "payment": {
                     "id": account_move.id,
                     "name": account_move.name,
