@@ -8,7 +8,7 @@ from ..resources.res_partner import PartnerUtility
 
 class ResPartner(http.Controller):
 
-    @http.route('/api/add/partner', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/api/add/partner', type='http', auth='public', methods=['POST'], csrf=False)
     def create_update_partner(self, **kwargs):
         try:
             auth_header = request.httprequest.headers.get("Authorization")
@@ -17,30 +17,33 @@ class ResPartner(http.Controller):
             request_data = PartnerData(**data)
             res_partner = PartnerUtility.get_or_create_partner(user_env, request_data)
 
-            return Response(
-                json.dumps({
-                    "success": True,
-                    "message": "Product created successfully",
-                    "product": {
-                        "product_id": res_partner.id,
-                        "product_name": res_partner.name,
-                        "x_care_id": res_partner.x_care_id,
-                    },
-                }),
-                status=200,
-                mimetype="application/json"
-            )
+            if not res_partner:
+                raise ValueError("Failed to create the payment")
+
+            json_response = {
+                "success": True,
+                "message": "Partner created successfully",
+                "partner": {
+                    "partner_id": res_partner.id,
+                    "partner_name": res_partner.name,
+                    "x_care_id": res_partner.x_care_id,
+                },
+            }
+            return request.make_json_response(json_response, status=200)
+
 
         except ValueError as e:
-            return Response(
-                json.dumps({"success": False, "error": str(e)}),
-                status=400,
-                mimetype="application/json"
-            )
+            error_response = {
+                "success": False,
+                "error_type": "ValueError",
+                "message": str(e),
+            }
+            return request.make_json_response(error_response, status=400)
 
         except Exception as err:
-            return Response(
-                json.dumps({"success": False, "error": f"Unexpected error: {str(err)}"}),
-                status=500,
-                mimetype="application/json"
-            )
+            error_response = {
+                "success": False,
+                "error_type": "ServerError",
+                "message": f"Unexpected error: {str(err)}",
+            }
+            return request.make_json_response(error_response, status=500)
