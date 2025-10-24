@@ -11,6 +11,7 @@ class InvoiceItem(BaseModel):
     sale_price: float = 0.0
     tax: Optional[float] = 0.0
     x_care_id: str
+    agent_id: str
 
 
 class BillType(Enum):
