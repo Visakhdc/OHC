@@ -123,6 +123,7 @@ class AccountUtility:
             tax_use_type = move_data.get("tax_use_type")
             account_move_model = user_env['account.move']
             account_tax_model = user_env['account.tax']
+            res_partner_model = user_env['res.partner']
 
             invoice_line_list = []
             for item in invoice_items:
@@ -139,6 +140,14 @@ class AccountUtility:
                 ], limit=1)
                 tax_ids = [default_tax.id] if default_tax else []
 
+                agent_ids = []
+                if item.agent_id:
+                    agent_res_partner = res_partner_model.search([('x_care_id', '=', item.agent_id)], limit=1)
+                    if agent_res_partner and agent_res_partner.agent:
+                        agent_ids = [(0, 0, {
+                            'agent_id': agent_res_partner.id,
+                            'commission_id': agent_res_partner.commission_id.id if agent_res_partner.commission_id else False,
+                        })]
                 invoice_line_list.append((0, 0, {
                     'product_id': product.id,
                     'quantity': item.quantity,
@@ -146,6 +155,7 @@ class AccountUtility:
                     'price_unit': item.sale_price,
                     'tax_ids': [(6, 0, tax_ids)],
                     'x_care_id': item.x_care_id,
+                    'agent_ids': agent_ids,
                 }))
             invoice_date = datetime.strptime(invoice_date, "%d-%m-%Y").date()
             due_date = datetime.strptime(due_date, "%d-%m-%Y").date()
