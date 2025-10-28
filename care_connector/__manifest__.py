@@ -6,7 +6,7 @@
     "installable": True,
     "depends": ["base","stock","web","contacts","account"],
     'external_dependencies': {
-            'python': ['pydantic'],
+            'python': ['pydantic','email-validator'],
         },
     "data": [
         "views/account_move_views.xml",
