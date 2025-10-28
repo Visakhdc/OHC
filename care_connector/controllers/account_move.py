@@ -1,7 +1,7 @@
 import json
 from odoo.http import request, Response
 from odoo import http
-from ..pydantic_models.account_move import AccountMoveApiRequest
+from ..pydantic_models.account_move import AccountMoveApiRequest,AccountMoveReturnApiRequest
 from ..authentication.authenticate_user import UserAuthentication
 from ..resources.account_move import AccountUtility
 
@@ -13,7 +13,7 @@ class AccountMove(http.Controller):
             auth_header = request.httprequest.headers.get("Authorization")
             user_env = UserAuthentication.get_authenticated_user(auth_header)
             data = json.loads(request.httprequest.data)
-            request_data = AccountMoveApiRequest(**data)
+            request_data = AccountMoveReturnApiRequest(**data)
             account_move = AccountUtility.get_or_create_account_move(user_env, request_data)
 
             if not account_move:
