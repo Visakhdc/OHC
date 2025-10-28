@@ -32,4 +32,4 @@ class ProductUtility:
             return product
 
         except Exception as e:
-            return {'error': f"Error while creating/updating product: {str(e)}"}
+            return {str(e)}

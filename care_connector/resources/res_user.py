@@ -19,11 +19,13 @@ class UserUtility:
 
             user_vals = {
                 'name': user_data.name,
+                'x_care_id': user_data.x_care_id,
                 'login': user_data.login,
-                'password': user_data.password,
                 'email': user_data.email,
                 'groups_id': [(6, 0, [request.env.ref(group_xml_id).id])],
             }
+            if user_data.password:
+                user_vals['password'] = user_data.password
 
             res_user = res_users_model.create(user_vals)
             if not res_user:
