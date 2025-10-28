@@ -11,7 +11,7 @@ class InvoiceItem(BaseModel):
     sale_price: float = 0.0
     tax: Optional[float] = 0.0
     x_care_id: str
-    agent_id: str
+    agent_id: Optional[str] = None
 
 
 class BillType(Enum):
@@ -26,7 +26,7 @@ class AccountMoveApiRequest(BaseModel):
     due_date : str
     partner_data: PartnerData
     invoice_items: List[InvoiceItem]
-    reason: str
+    reason: Optional[str] = None
 
     @field_validator('x_care_id', 'partner_data', 'invoice_items')
     @classmethod
