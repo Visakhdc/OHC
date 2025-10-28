@@ -11,7 +11,7 @@ class InvoiceItem(BaseModel):
     sale_price: float = 0.0
     tax: Optional[float] = 0.0
     x_care_id: str
-    agent_id: Optional[str] = None
+    agent_id: str | None = None
 
 
 class BillType(Enum):
@@ -26,7 +26,7 @@ class AccountMoveApiRequest(BaseModel):
     due_date : str
     partner_data: PartnerData
     invoice_items: List[InvoiceItem]
-    reason: Optional[str] = None
+    reason: str | None = None
 
     @field_validator('x_care_id', 'partner_data', 'invoice_items')
     @classmethod
@@ -35,3 +35,12 @@ class AccountMoveApiRequest(BaseModel):
             raise ValueError('Field cannot be empty')
         return field_value
 
+
+class AccountMoveReturnApiRequest(BaseModel):
+    x_care_id: str
+    bill_type: BillType | None = None
+    invoice_date: str | None = None
+    due_date: str | None = None
+    partner_data: PartnerData | None = None
+    invoice_items: List[InvoiceItem] | None = None
+    reason: str | None = None
