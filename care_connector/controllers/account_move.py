@@ -13,7 +13,7 @@ class AccountMove(http.Controller):
             auth_header = request.httprequest.headers.get("Authorization")
             user_env = UserAuthentication.get_authenticated_user(auth_header)
             data = json.loads(request.httprequest.data)
-            request_data = AccountMoveReturnApiRequest(**data)
+            request_data = AccountMoveApiRequest(**data)
             account_move = AccountUtility.get_or_create_account_move(user_env, request_data)
 
             if not account_move:
@@ -55,7 +55,7 @@ class AccountMove(http.Controller):
             auth_header = request.httprequest.headers.get("Authorization")
             user_env = UserAuthentication.get_authenticated_user(auth_header)
             data = json.loads(request.httprequest.data)
-            request_data = AccountMoveApiRequest(**data)
+            request_data = AccountMoveReturnApiRequest(**data)
             account_move = AccountUtility.get_or_create_account_move_return(user_env, request_data)
 
             if not account_move:
