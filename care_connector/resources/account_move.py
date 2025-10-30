@@ -23,9 +23,7 @@ class AccountUtility:
             due_date = request_data.due_date
 
             move_type = "out_invoice"
-            tax_use_type = 'sale'
             if bill_type == "vendor":
-                tax_use_type = 'purchase'
                 move_type = "in_invoice"
 
             move_data_dict = {
@@ -35,7 +33,6 @@ class AccountUtility:
                 "invoice_date": invoice_date,
                 "due_date": due_date,
                 "move_type": move_type,
-                "tax_use_type": tax_use_type,
             }
             account_move = cls._create_account_move(user_env, move_data_dict)
             if not account_move:
@@ -84,9 +81,7 @@ class AccountUtility:
                 due_date = request_data.due_date
 
                 move_type = "out_refund"
-                tax_use_type = 'sale'
                 if bill_type == "vendor":
-                    tax_use_type = 'purchase'
                     move_type = "in_refund"
 
                 move_data_dict = {
@@ -96,7 +91,6 @@ class AccountUtility:
                     "invoice_date": invoice_date,
                     "due_date": due_date,
                     "move_type": move_type,
-                    "tax_use_type": tax_use_type,
                 }
                 account_move = cls._create_account_move(user_env, move_data_dict)
                 if not account_move.id:
@@ -120,9 +114,7 @@ class AccountUtility:
             invoice_date = move_data.get("invoice_date")
             due_date = move_data.get("due_date")
             move_type = move_data.get("move_type")
-            tax_use_type = move_data.get("tax_use_type")
             account_move_model = user_env['account.move']
-            account_tax_model = user_env['account.tax']
             res_partner_model = user_env['res.partner']
 
             invoice_line_list = []
@@ -132,13 +124,6 @@ class AccountUtility:
 
                 if not product.id:
                     raise ValueError(f"Failed to create or retrieve the product, err:{str(product)}")
-
-                tax = int(item.tax)
-                default_tax = account_tax_model.search([
-                    ('amount', '=', tax),
-                    ('type_tax_use', '=', tax_use_type)
-                ], limit=1)
-                tax_ids = [default_tax.id] if default_tax else []
 
                 agent_ids = []
                 if item.agent_id:
@@ -153,7 +138,6 @@ class AccountUtility:
                     'quantity': item.quantity,
                     'received_qty': item.quantity,
                     'price_unit': item.sale_price,
-                    'tax_ids': [(6, 0, tax_ids)],
                     'x_care_id': item.x_care_id,
                     'agent_ids': agent_ids,
                 }))
