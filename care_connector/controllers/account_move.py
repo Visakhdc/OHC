@@ -16,8 +16,8 @@ class AccountMove(http.Controller):
             request_data = AccountMoveApiRequest(**data)
             account_move = AccountUtility.get_or_create_account_move(user_env, request_data)
 
-            if not account_move:
-                raise ValueError("Failed to create or retrieve the Invoice")
+            if not account_move.id:
+                raise ValueError(f"Failed to create or retrieve the Invoice, error: {str(account_move)}")
 
             json_response = {
                 "success": True,
@@ -58,8 +58,8 @@ class AccountMove(http.Controller):
             request_data = AccountMoveReturnApiRequest(**data)
             account_move = AccountUtility.get_or_create_account_move_return(user_env, request_data)
 
-            if not account_move:
-                raise ValueError("Failed to return the Invoice")
+            if not account_move.id:
+                raise ValueError(f"Failed to create or retrieve the Invoice, error: {str(account_move)}")
 
             json_response = {
                 "success": True,
