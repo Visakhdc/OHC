@@ -14,25 +14,31 @@ class ProductUtility:
             category = CategoryUtility.get_or_create_category(user_env, category_data)
             categ_id = category.id if category else None
 
-            taxes_ids = cls._get_or_create_taxes(user_env, tax_list)
+            taxes_ids = None
+            if tax_list:
+                taxes_ids = cls._get_or_create_taxes(user_env, tax_list)
 
             if not product:
-                product = product_product_model.create({
+                product_data_dict = {
                     'name': product_data.product_name if product_data.product_name else 'New Product',
                     'x_care_id': product_data.x_care_id,
                     'list_price': product_data.mrp if product_data.mrp else 0.0,
                     'standard_price': product_data.cost if product_data.cost else 0.0,
                     'categ_id': categ_id,
-                    'taxes_id': taxes_ids['sale_tax'],
-                    'supplier_taxes_id': taxes_ids['purchase_tax'],
-                })
+                }
+                if taxes_ids:
+                    product_data_dict['taxes_id'] = taxes_ids['sale_tax']
+                    product_data_dict['supplier_taxes_id'] = taxes_ids['purchase_tax']
+
+                product = product_product_model.create(product_data_dict)
             else:
                 product.name = product_data.product_name
                 product.list_price = product_data.mrp
                 product.categ_id = categ_id
                 product.standard_price = product_data.cost
-                product.taxes_id = taxes_ids['sale_tax']
-                product.supplier_taxes_id = taxes_ids['purchase_tax']
+                if taxes_ids:
+                    product.taxes_id = taxes_ids['sale_tax']
+                    product.supplier_taxes_id = taxes_ids['purchase_tax']
 
             return product
 

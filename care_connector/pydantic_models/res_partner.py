@@ -13,4 +13,4 @@ class PartnerData(BaseModel):
     phone: str
     state: str
     partner_type: PartnerType
-    agent: bool
+    agent: bool | None = None

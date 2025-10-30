@@ -27,6 +27,9 @@ class PartnerUtility:
                     'country_id': country.id if country else False,
                     'state_id': state.id if state else False,
                 })
+            else:
+                res_partner.name = partner_data.name
+
             return res_partner
 
         except Exception as e:

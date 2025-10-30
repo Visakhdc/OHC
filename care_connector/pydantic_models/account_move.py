@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field, field_validator
-from typing import List, Optional
+from pydantic import BaseModel
+from typing import List
 from enum import Enum
 from .res_partner import PartnerData
 from .product_product import ProductData
@@ -9,7 +9,6 @@ class InvoiceItem(BaseModel):
     product_data:  ProductData
     quantity: float = 1.0
     sale_price: float = 0.0
-    tax: Optional[float] = 0.0
     x_care_id: str
     agent_id: str | None = None
 
@@ -27,13 +26,6 @@ class AccountMoveApiRequest(BaseModel):
     partner_data: PartnerData
     invoice_items: List[InvoiceItem]
     reason: str | None = None
-
-    @field_validator('x_care_id', 'partner_data', 'invoice_items')
-    @classmethod
-    def check_not_empty(cls, field_value):
-        if not field_value:
-            raise ValueError('Field cannot be empty')
-        return field_value
 
 
 class AccountMoveReturnApiRequest(BaseModel):

@@ -14,7 +14,7 @@ class TaxData(BaseModel):
 class ProductData(BaseModel):
     product_name : str
     x_care_id: str
-    cost:float = 0.0
+    cost:float | None = None
     mrp:float = 0.0
     category: CategoryData
-    taxes: list[TaxData]
+    taxes : list[TaxData] | None = None
