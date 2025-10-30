@@ -17,8 +17,8 @@ class ProductCategory(http.Controller):
             request_data = CategoryData(**data)
             product_category = CategoryUtility.get_or_create_category(user_env, request_data)
 
-            if not product_category:
-                raise ValueError("Failed to create the Category")
+            if not product_category.id:
+                raise ValueError(f"Failed to create the Category, err:{str(product_category)}")
 
             json_response = {
                     "success": True,

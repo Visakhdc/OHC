@@ -42,7 +42,7 @@ class AccountUtility:
                 raise ValueError("Failed to create the Invoice")
             return account_move
         except Exception as e:
-            raise Exception(f"Authentication failed: {str(e)}")
+            raise Exception(f"{str(e)}")
 
     @classmethod
     def get_or_create_account_move_return(cls,user_env, request_data):
@@ -99,8 +99,8 @@ class AccountUtility:
                     "tax_use_type": tax_use_type,
                 }
                 account_move = cls._create_account_move(user_env, move_data_dict)
-                if not account_move:
-                    raise ValueError("Failed to create the Invoice")
+                if not account_move.id:
+                    raise ValueError(f"Failed to create the Invoice, err:{str(account_move)}")
                 return {
                     "success": True,
                     "invoice_id": account_move.id,
@@ -130,8 +130,8 @@ class AccountUtility:
                 product_data = item.product_data
                 product = ProductUtility.get_or_create_product(user_env, product_data)
 
-                if not product:
-                    raise ValueError("Failed to create or retrieve the product")
+                if not product.id:
+                    raise ValueError(f"Failed to create or retrieve the product, err:{str(product)}")
 
                 tax = int(item.tax)
                 default_tax = account_tax_model.search([

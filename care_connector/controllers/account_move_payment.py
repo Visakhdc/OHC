@@ -16,8 +16,8 @@ class AccountMovePayment(http.Controller):
             request_data = AccountMovePaymentApiRequest(**data)
             account_payment = InvoicePaymentUtility.get_or_create_invoice_payment(user_env, request_data)
 
-            if not account_payment:
-                raise ValueError("Failed to create the payment")
+            if not account_payment.id:
+                raise ValueError(f"Failed to create the payment, error: {str(account_payment)}")
 
             json_response = {
                 "success": True,
