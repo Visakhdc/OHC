@@ -15,6 +15,7 @@ class InvoicePaymentUtility:
             payment_date = request_data.payment_date
             partner_data = request_data.partner_data
             payment_mode = request_data.payment_mode
+            customer_type = request_data.customer_type
 
             account_move_model = user_env["account.move"]
             account_journal_model = user_env['account.journal']
@@ -66,12 +67,9 @@ class InvoicePaymentUtility:
                 if not partner:
                     raise ValueError(f"Create or retrieve partner is failed ")
 
-                if payment_mode.value == "send":
-                    payment_type = 'outbound'
-                    partner_type_str = 'supplier'
-                else:
-                    payment_type = 'inbound'
-                    partner_type_str = 'customer'
+                payment_type = 'outbound' if payment_mode.value == "send" else 'inbound'
+
+                partner_type_str = 'supplier' if customer_type.value == 'vendor' else 'customer'
 
                 payment_vals = {
                     'x_care_id': x_care_id,

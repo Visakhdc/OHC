@@ -53,6 +53,12 @@ class AccountUtility:
             existing_invoice = account_move.search([('x_care_id', '=', x_care_id)], limit=1)
 
             if existing_invoice:
+                existing_credit_note = account_move.search([
+                    ("reversed_entry_id", "=", existing_invoice.id)
+                ], limit=1)
+                if existing_credit_note:
+                    raise ValueError(f"This invoice has already been reversed and a credit note [{str(existing_credit_note.name)}] exists.")
+
                 reversal_wizard = a_m_r_model.with_context(
                     {'active_ids': [existing_invoice.id], 'active_id': existing_invoice.id,
                      'active_model': 'account.move'}).create({
@@ -71,6 +77,7 @@ class AccountUtility:
                 if not credit_note:
                     raise ValueError("Failed to create Credit note")
 
+                credit_note.x_care_id = f"RE/{credit_note.x_care_id}"
                 credit_note.action_post()
                 return credit_note
 
