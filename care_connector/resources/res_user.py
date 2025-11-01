@@ -44,6 +44,7 @@ class UserUtility:
                 'company_type': partner_data.partner_type.value,
                 'email': partner_data.email,
                 'phone': partner_data.phone,
+                'vat': partner_data.pan,
                 'country_id': country.id if country else False,
                 'state_id': state.id if state else False,
                 'agent': is_agent
