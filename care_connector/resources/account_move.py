@@ -160,7 +160,9 @@ class AccountUtility:
             })
             if not account_move:
                 raise ValueError("Failed to create the Invoice")
-            account_move.action_post()
+
+            if move_type == 'out_invoice':
+                account_move.action_post()
             return account_move
 
         except Exception as e:
