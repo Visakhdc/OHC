@@ -272,7 +272,7 @@ publicWidget.registry.CounterCashDenomination = publicWidget.Widget.extend({
 
                     self.$('#petty_cash_total_field').val(parseFloat(result.petty_cash_total || 0).toFixed(2));
 
-                    self.$('#cash_in_hand').val(parseFloat(result.cash_in_hand || 0).toFixed(2));
+                    self.$('#cash_in_hand').val(Math.trunc(parseFloat(result.cash_in_hand || 0)));
                 }
             })
             .catch(function (err) {
