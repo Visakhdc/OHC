@@ -53,21 +53,20 @@ class ProductUtility:
             purchase_tax_ids = []
             for tax_data in tax_list:
                 tax_name = f"{tax_data.tax_name} ({tax_data.tax_percentage}%)"
-                tax_type = "purchase" if tax_data.tax_type.value == 'purchase_tax' else 'sale'
-                existing_tax = account_tax_model.search([
-                    ('name', '=', tax_name),
-                    ('amount', '=', tax_data.tax_percentage),
-                    ('type_tax_use', '=', tax_type)
-                ], limit=1)
-
-                if not existing_tax:
-                    existing_tax = account_tax_model.create({
-                        'name': tax_name,
-                        'amount': tax_data.tax_percentage,
-                        'type_tax_use': tax_type,
-                    })
-                purchase_tax_ids.append(existing_tax.id) if tax_type == "purchase" else sale_tax_ids.append(
-                    existing_tax.id)
+                for tax_type in ['sale', 'purchase']:
+                    name = f"{tax_name} - {tax_type.capitalize()}"
+                    existing_tax = account_tax_model.search([
+                        ('name', '=', name),
+                        ('amount', '=', tax_data.tax_percentage),
+                        ('type_tax_use', '=', tax_type)
+                    ], limit=1)
+                    if not existing_tax:
+                        existing_tax = account_tax_model.create({
+                            'name': name,
+                            'amount': tax_data.tax_percentage,
+                            'type_tax_use': tax_type,
+                        })
+                    (sale_tax_ids if tax_type == 'sale' else purchase_tax_ids).append(existing_tax.id)
             taxes_dict = {
                 "purchase_tax": purchase_tax_ids,
                 "sale_tax": sale_tax_ids

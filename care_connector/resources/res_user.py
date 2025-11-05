@@ -11,10 +11,18 @@ class UserUtility:
             state_model = user_env['res.country.state']
             existing_user = res_users_model.search([('login', '=', user_data.login)], limit=1)
 
-            if existing_user:
-                return existing_user
             user_type = user_data.user_type.value
             partner_data = user_data.partner_data
+            is_agent = True if partner_data.agent == True else False
+
+            if existing_user:
+                existing_user.name = user_data.name
+                partner = existing_user.partner_id
+                partner.company_type = partner_data.partner_type.value
+                partner.phone = partner_data.phone
+                partner.vat = partner_data.pan
+                partner.aget = is_agent
+                return existing_user
             group_xml_id = 'base.group_portal' if user_type == 'portal' else 'base.group_user'
 
             user_vals = {
@@ -38,7 +46,6 @@ class UserUtility:
                 ('country_id', '=', country.id)
             ], limit=1)
 
-            is_agent= True if partner_data.agent == True else False
             partner_vals = {
                 'x_care_id': partner_data.x_care_id,
                 'company_type': partner_data.partner_type.value,
