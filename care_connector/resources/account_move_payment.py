@@ -16,12 +16,14 @@ class InvoicePaymentUtility:
             partner_data = request_data.partner_data
             payment_mode = request_data.payment_mode
             customer_type = request_data.customer_type
+            counter_data = request_data.counter_data
 
             account_move_model = user_env["account.move"]
             account_journal_model = user_env['account.journal']
             account_payment_model = user_env['account.payment']
             a_p_r_transient_model = user_env['account.payment.register']
 
+            bill_counter = cls.get_or_create_bill_counter(user_env, counter_data)
             existing_payment = account_payment_model.search([('x_care_id', '=', x_care_id)], limit=1)
             if existing_payment:
                 raise ValueError(f"'{x_care_id}' already paid")
@@ -59,6 +61,8 @@ class InvoicePaymentUtility:
                 if not account_payment:
                     raise ValueError(f"Payment creation failed")
                 account_payment.x_care_id = x_care_id
+                account_payment.location = bill_counter.id
+                account_payment.cashier = bill_counter.name
 
                 return account_payment
 
@@ -79,6 +83,8 @@ class InvoicePaymentUtility:
                     'amount': amount,
                     'journal_id': account_journal.id,
                     'date': payment_date or fields.Date.today(),
+                    'location': bill_counter.id,
+                    'cashier': bill_counter.name,
                 }
 
                 account_payment = account_payment_model.create(payment_vals)
@@ -130,6 +136,36 @@ class InvoicePaymentUtility:
 
             existing_payment.cancel_status = True
             return existing_payment
+
+        except Exception as e:
+            raise ValueError(str(e))
+
+
+    @classmethod
+    def get_or_create_bill_counter(cls, user_env, counter_data):
+        try:
+            x_care_id = counter_data.x_care_id
+            cashier_x_care_id = counter_data.cashier_id
+            counter_name = counter_data.counter_name
+            bill_counter_model = user_env['bill.counter']
+            res_users_model = user_env['res.users']
+
+            res_user = res_users_model.search([('partner_id.x_care_id', '=', cashier_x_care_id)], limit=1)
+            bill_counter = bill_counter_model.search([('x_care_id', '=', x_care_id)], limit=1)
+
+            if not bill_counter:
+                bill_counter = bill_counter_model.create({
+                    'x_care_id': x_care_id,
+                    'name': [(6, 0, [res_user.id])] if res_user else [],
+                    'bill_counter': counter_name,
+                })
+
+            if res_user and res_user.id not in bill_counter.name.ids:
+                bill_counter.sudo().write({
+                    'name': [(4, res_user.id)]
+                })
+            return bill_counter
+
 
         except Exception as e:
             raise ValueError(str(e))

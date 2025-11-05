@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, field_validator
 from enum import Enum
 from .res_partner import PartnerData
+from . bill_counter import BillCounterData
 
 class JournalType(Enum):
     cash = 'cash'
@@ -23,6 +24,7 @@ class AccountMovePaymentApiRequest(BaseModel):
     payment_mode : PaymentMode
     partner_data: PartnerData
     customer_type: CustomerType
+    counter_data: BillCounterData
 
 class AccountPaymentCancelApiRequest(BaseModel):
     x_care_id: str
