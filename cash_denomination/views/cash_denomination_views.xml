@@ -5,9 +5,9 @@
       <field name="name">cash.denomination.list</field>
       <field name="model">cash.denomination</field>
       <field name="arch" type="xml">
-        <list string="Cash Denominations">
+        <list string="Cashier Denomination Entry">
           <field name="date"/>
-          <field name="user"/> 
+          <field name="user"/>
           <field name="counter"/>
           <field name="grand_total"/>
         </list>
@@ -18,7 +18,17 @@
       <field name="name">cash.denomination.form</field>
       <field name="model">cash.denomination</field>
       <field name="arch" type="xml">
-        <form string="Cash Denomination">
+        <form string="Cashier Denomination Entry">
+          <header>
+            <!-- Buttons based on state -->
+            <button name="action_reset_to_draft" string="Reset to Draft" type="object" class="btn-secondary" invisible="state == 'draft'"/>
+
+            <button name="action_approve" string="Approve" type="object" class="btn-primary" invisible="state != 'draft'"/>
+
+            <button name="action_reject" string="Reject" type="object" class="btn-danger" invisible="state != 'draft'"/>
+
+            <field name="state" widget="statusbar" statusbar_visible="draft,approved,rejected"/>
+          </header>
           <sheet>
             <group>
               <group>
@@ -39,18 +49,18 @@
                   </list>
                 </field>
               </page>
-                <page string="Cash Transfers">
-                    <field name="transfer_line_ids">
-                        <list editable="bottom">
-                            <field name="from_counter"/>
-                            <field name="to_counter"/>
-                            <field name="to_user"/>
-                            <field name="amount"/>
-                            <field name="remarks"/>
-                            <field name="transfer_date"/>
-                        </list>
-                    </field>
-                </page>
+              <page string="Cash Transfers">
+                <field name="transfer_line_ids">
+                  <list editable="bottom">
+                    <field name="from_counter"/>
+                    <field name="to_counter"/>
+                    <field name="to_user"/>
+                    <field name="amount"/>
+                    <field name="remarks"/>
+                    <field name="transfer_date"/>
+                  </list>
+                </field>
+              </page>
             </notebook>
 
             <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 10px; gap: 8px; margin-left:1350px">
@@ -64,7 +74,7 @@
     </record>
 
     <record id="action_cash_denomination" model="ir.actions.act_window">
-      <field name="name">Cash Denomination</field>
+      <field name="name">Cashier Denomination Entry</field>
       <field name="res_model">cash.denomination</field>
       <field name="view_mode">list,form</field>
       <field name="help" type="html">
@@ -74,6 +84,6 @@
       </field>
     </record>
 
-    <menuitem id="menu_cash_denomination" name="Cash Denomination" parent="account.menu_finance" action="action_cash_denomination" sequence="9"/>
+    <menuitem id="menu_cash_denomination" name="Cashier Denomination Entry" parent="care_connector.menu_main_cash_denomination" action="action_cash_denomination" sequence="1"/>
   </data>
 </odoo>

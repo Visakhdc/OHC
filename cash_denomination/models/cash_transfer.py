@@ -6,8 +6,8 @@ class CashTransfer(models.Model):
     _order = 'id desc'
 
     name = fields.Many2one('res.users',string='Transferred By', )
-    from_counter = fields.Many2one('cash.counter', string='From Counter', readonly=True)
-    to_counter = fields.Many2one('cash.counter', string='To Counter', readonly=True)
+    from_counter = fields.Many2one('bill.counter', string='From Counter', readonly=True)
+    to_counter = fields.Many2one('bill.counter', string='To Counter', readonly=True)
     amount = fields.Integer(string='Cash')
     remarks = fields.Char(string='Remarks', readonly=True)
     date = fields.Datetime(string='Transfer Date', default=fields.Datetime.now,)
