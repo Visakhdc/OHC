@@ -11,6 +11,8 @@
             </xpath>
             <xpath expr="//field[@name='payment_method_line_id']" position="after">
                 <field name="x_care_id" readonly="1"/>
+                <field name="location"/>
+                <field name="cashier"/>
             </xpath>
         </field>
     </record>
