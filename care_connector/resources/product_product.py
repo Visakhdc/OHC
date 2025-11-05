@@ -25,6 +25,7 @@ class ProductUtility:
                     'list_price': product_data.mrp if product_data.mrp else 0.0,
                     'standard_price': product_data.cost if product_data.cost else 0.0,
                     'categ_id': categ_id,
+                    'l10n_in_hsn_code': product_data.hsn
                 }
                 if taxes_ids:
                     product_data_dict['taxes_id'] = taxes_ids['sale_tax']
@@ -36,6 +37,8 @@ class ProductUtility:
                 product.list_price = product_data.mrp
                 product.categ_id = categ_id
                 product.standard_price = product_data.cost
+                if product_data.hsn:
+                    product.l10n_in_hsn_code = product_data.hsn
                 if taxes_ids:
                     product.taxes_id = taxes_ids['sale_tax']
                     product.supplier_taxes_id = taxes_ids['purchase_tax']

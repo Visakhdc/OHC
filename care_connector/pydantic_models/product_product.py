@@ -12,3 +12,4 @@ class ProductData(BaseModel):
     mrp:float = 0.0
     category: CategoryData
     taxes : list[TaxData] | None = None
+    hsn: str | None = None
