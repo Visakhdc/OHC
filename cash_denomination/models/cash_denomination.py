@@ -8,16 +8,32 @@ class CashDenomination(models.Model):
 
     date = fields.Date(string='Date', readonly=True)
     user = fields.Many2one('res.users',string='Person',readonly=True)
-    counter = fields.Integer(string='Counter',readonly=True)
+    counter = fields.Char(string='Counter',readonly=True)
     line_ids = fields.One2many('cash.denomination.line', 'denomination_id', string='Denomination Lines',readonly=True)
     grand_total = fields.Float(string='Total', compute='_comput_grand_total', store=True)
     transfer_line_ids = fields.One2many('cash.denomination.transfer.line', 'denomination_id', string='Cash Transfer Lines', readonly=True)
+
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ], string='Status', default='draft', tracking=True)
 
     @api.depends('line_ids.sub_total')
     def _comput_grand_total(self):
         for record in self:
             self.grand_total=sum(record.line_ids.mapped('sub_total'))
-    
+
+    def action_reset_to_draft(self):
+        self.write({'state': 'draft'})
+
+    def action_approve(self):
+        self.write({'state': 'approved'})
+
+    def action_reject(self):
+        self.write({'state': 'rejected'})
+
+
 class CashDenominationLine(models.Model):
     _name = 'cash.denomination.line'
     _description = 'Cash Denomination Line'
@@ -42,8 +58,8 @@ class CashDenominationTransferLine(models.Model):
     _description = 'Cash Denomination Transfer Line'
 
     denomination_id = fields.Many2one('cash.denomination', string='Cash Denomination', ondelete='cascade')
-    from_counter = fields.Many2one('cash.counter', string='From Counter', readonly=True)
-    to_counter = fields.Many2one('cash.counter', string='To Counter', readonly=True)
+    from_counter = fields.Many2one('bill.counter', string='From Counter', readonly=True)
+    to_counter = fields.Many2one('bill.counter', string='To Counter', readonly=True)
     amount = fields.Float(string='Amount', readonly=True)
     remarks = fields.Char(string='Remarks', readonly=True)
     transfer_date = fields.Datetime(string='Transfer Date', readonly=True)
