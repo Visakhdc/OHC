@@ -19,10 +19,17 @@ class SalesInvoiceExcelWizard(models.TransientModel):
         default=lambda self: date.today()
     )
 
+    section_type = fields.Selection([
+        ('sales', 'Sales'),
+        ('sales_return', 'Sales Return'),
+    ], string="Section", default='sales', required=True)
+
     def action_print_excel(self):
-        """Generate Excel report for customer invoices (without HSN Code)"""
+        """Generate Excel report for sales or sales returns"""
+        move_type = 'out_invoice' if self.section_type == 'sales' else 'out_refund'
+
         invoices = self.env['account.move'].search([
-            ('move_type', '=', 'out_invoice'),
+            ('move_type', '=', move_type),
             ('invoice_date', '>=', self.date_from),
             ('invoice_date', '<=', self.date_to),
             ('state', '=', 'posted'),
@@ -54,11 +61,12 @@ class SalesInvoiceExcelWizard(models.TransientModel):
             'bg_color': '#B7DEE8'
         })
 
-        sheet.merge_range('A1:K1', 'SALES INVOICE REPORT', title_format)
+        title_text = 'SALES INVOICE REPORT' if self.section_type == 'sales' else 'SALES RETURN REPORT'
+        sheet.merge_range('A1:K1', title_text, title_format)
 
         headers = [
             'Date', 'Invoice No', 'Customer', 'Product', 'Account',
-            'Quantity', 'Unit Price', 'Subtotal', 'Tax','Tax Amount', 'Total Amount'
+            'Quantity', 'Unit Price', 'Subtotal', 'Tax', 'Tax Amount', 'Total Amount'
         ]
         for col, title in enumerate(headers):
             sheet.write(2, col, title, header)
@@ -98,8 +106,11 @@ class SalesInvoiceExcelWizard(models.TransientModel):
         output.seek(0)
         file_data = base64.b64encode(output.read())
 
+        section_label = "Sales" if self.section_type == 'sales' else "Sales_Return"
+        file_name = f"{section_label}_Invoice_Report_{self.date_from}_{self.date_to}.xlsx"
+
         attachment = self.env['ir.attachment'].create({
-            'name': f'Sales_Invoice_Report_{self.date_from}_{self.date_to}.xlsx',
+            'name': file_name,
             'type': 'binary',
             'datas': file_data,
             'res_model': 'sales.invoice.excel.wizard',

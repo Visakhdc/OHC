@@ -8,14 +8,28 @@ class VendorBillExcelWizard(models.TransientModel):
     _name = 'vendor.bill.excel.wizard'
     _description = 'Vendor Bill Excel Report Wizard'
 
-    date_from = fields.Date(string="Date From", required=True, default=lambda self: date.today().replace(day=1))
-    date_to = fields.Date(string="Date To", required=True, default=lambda self: date.today())
+    date_from = fields.Date(
+        string="Date From",
+        required=True,
+        default=lambda self: date.today().replace(day=1)
+    )
+    date_to = fields.Date(
+        string="Date To",
+        required=True,
+        default=lambda self: date.today()
+    )
+
+    section_type = fields.Selection([
+        ('purchase', 'Purchase Bills'),
+        ('purchase_return', 'Purchase Returns'),
+    ], string="Section", default='purchase', required=True)
 
     def action_print_excel(self):
-        """Generate Excel report for vendor bills"""
-        bill_model = self.env['account.move']
-        bills = bill_model.search([
-            ('move_type', '=', 'in_invoice'),
+        """Generate Excel report for vendor bills or purchase returns"""
+        move_type = 'in_invoice' if self.section_type == 'purchase' else 'in_refund'
+
+        bills = self.env['account.move'].search([
+            ('move_type', '=', move_type),
             ('invoice_date', '>=', self.date_from),
             ('invoice_date', '<=', self.date_to),
             ('state', '=', 'posted'),
@@ -45,7 +59,8 @@ class VendorBillExcelWizard(models.TransientModel):
             'valign': 'vcenter', 'bg_color': '#B7DEE8'
         })
 
-        sheet.merge_range('A1:L1', 'VENDOR BILL REPORT', title_format)
+        title_text = 'VENDOR BILL REPORT' if self.section_type == 'purchase' else 'PURCHASE RETURN REPORT'
+        sheet.merge_range('A1:L1', title_text, title_format)
 
         headers = [
             'Date', 'Bill No', 'Vendor', 'Product', 'Account',
@@ -83,15 +98,17 @@ class VendorBillExcelWizard(models.TransientModel):
                 sheet.write(row, 8, tax_names, text)
                 sheet.write(row, 9, tax_amount, text)
                 sheet.write(row, 10, bill.amount_total, text)
-
                 row += 1
 
         workbook.close()
         output.seek(0)
         file_data = base64.b64encode(output.read())
 
+        section_label = "Purchase_Bills" if self.section_type == 'purchase' else "Purchase_Returns"
+        file_name = f'{section_label}_Report_{self.date_from}_{self.date_to}.xlsx'
+
         attachment = self.env['ir.attachment'].create({
-            'name': f'Vendor_Bill_Report_{self.date_from}_{self.date_to}.xlsx',
+            'name': file_name,
             'type': 'binary',
             'datas': file_data,
             'res_model': 'vendor.bill.excel.wizard',

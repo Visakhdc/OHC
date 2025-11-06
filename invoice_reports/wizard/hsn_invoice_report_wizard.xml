@@ -24,7 +24,7 @@
         <field name="view_id" ref="hsn_invoice_report_view"/>
         <field name="target">new</field>
     </record>
-    <menuitem id="menu_nvoice_report_menu" name="Invoice Reports" sequence="10" parent="account.menu_finance_reports"/>
+    <menuitem id="menu_nvoice_report_menu" name="Invoice Excel Reports" sequence="10" parent="account.menu_finance_reports"/>
     <menuitem id="menu_hsn_invoice_report_menu" name="HSN Invoice Report" sequence="1" action="action_hsn_invoice_report" parent="menu_nvoice_report_menu"/>
 
 </odoo>
