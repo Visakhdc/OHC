@@ -61,8 +61,8 @@ class InvoicePaymentUtility:
                 if not account_payment:
                     raise ValueError(f"Payment creation failed")
                 account_payment.x_care_id = x_care_id
-                account_payment.location = bill_counter.id
-                account_payment.cashier = bill_counter.name
+                account_payment.location = bill_counter.get('bill_counter_id')
+                account_payment.cashier = bill_counter.get('user_id')
 
                 return account_payment
 
@@ -83,8 +83,8 @@ class InvoicePaymentUtility:
                     'amount': amount,
                     'journal_id': account_journal.id,
                     'date': payment_date or fields.Date.today(),
-                    'location': bill_counter.id,
-                    'cashier': bill_counter.name,
+                    'location': bill_counter.get('bill_counter_id'),
+                    'cashier': bill_counter.get('user_id'),
                 }
 
                 account_payment = account_payment_model.create(payment_vals)
@@ -164,7 +164,10 @@ class InvoicePaymentUtility:
                 bill_counter.sudo().write({
                     'name': [(4, res_user.id)]
                 })
-            return bill_counter
+            return {
+                'bill_counter_id': bill_counter.id if bill_counter else False,
+                'user_id': res_user.id if res_user else False
+            }
 
 
         except Exception as e:
