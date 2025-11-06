@@ -126,6 +126,9 @@ class AccountUtility:
 
             invoice_line_list = []
             for item in invoice_items:
+                discount_id = None
+                if item.discounts:
+                    discount_id = cls._get_or_create_discounts(user_env, item.discounts)
                 product_data = item.product_data
                 product = ProductUtility.get_or_create_product(user_env, product_data)
 
@@ -147,6 +150,7 @@ class AccountUtility:
                     'price_unit': item.sale_price,
                     'x_care_id': item.x_care_id,
                     'agent_ids': agent_ids,
+                    'account_discount': discount_id,
                 }))
             invoice_date = datetime.strptime(invoice_date, "%d-%m-%Y").date()
             due_date = datetime.strptime(due_date, "%d-%m-%Y").date()
@@ -164,6 +168,57 @@ class AccountUtility:
             if move_type == 'out_invoice':
                 account_move.action_post()
             return account_move
+
+        except Exception as e:
+            raise Exception(f"{str(e)}")
+
+
+    @classmethod
+    def _get_or_create_discounts(cls, user_env, discount_data):
+        try:
+            discount_group_model = user_env['account.discount.groups']
+            discount_model = user_env['account.discount']
+            group_id = None
+            if discount_data.discount_group:
+                group = discount_data.discount_group
+
+                discount_group = discount_group_model.search([
+                    ('x_care_id', '=', group.x_care_id)
+                ], limit=1)
+                if not discount_group:
+
+                    discount_group = discount_group_model.create({
+                        'x_care_id': group.x_care_id,
+                        'name': group.name
+                    })
+                elif discount_group.name != group.name:
+                    discount_group.name = group.name
+
+                group_id = discount_group.id
+
+            discount = discount_model.search([
+                ('x_care_id', '=', discount_data.x_care_id)
+            ], limit=1)
+
+            if not discount:
+                discount = discount_model.create({
+                    'x_care_id': discount_data.x_care_id,
+                    'name': discount_data.name,
+                    'discount_group': group_id,
+                    'amount': discount_data.amount
+                })
+
+            else:
+                vals = {}
+                if discount.name != discount_data.name:
+                    vals['name'] = discount_data.name
+                if discount.amount != discount_data.amount:
+                    vals['amount'] = discount_data.amount
+                if discount.discount_group.id != group_id:
+                    vals['discount_group'] = group_id
+                if vals:
+                    discount.write(vals)
+            return discount.id
 
         except Exception as e:
             raise Exception(f"{str(e)}")
