@@ -3,12 +3,12 @@
     'name': "Partner Ledger Excel Report",
     'summary': "Generate detailed partner ledger reports in Excel format",
     'description': "This module allows users to generate and export Partner Ledger reports directly into Excel format",
-    'category': 'Website',
+    'category': 'Accounting',
     'version': '0.1',
-    'depends': ['base','account','base_accounting_kit'],
+    'depends': ['base','account','base_accounting_kit','excel_reports'],
     'data': [
         'security/ir.model.access.csv',
-        'views/inherit_common_partner_report_views.xml',
+        'wizard/partner_ledger_report_wizard.xml',
         
     ],
     
