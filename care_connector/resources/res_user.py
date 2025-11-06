@@ -20,7 +20,7 @@ class UserUtility:
                 partner = existing_user.partner_id
                 partner.company_type = partner_data.partner_type.value
                 partner.phone = partner_data.phone
-                partner.vat = partner_data.pan
+                partner.l10n_in_pan = partner_data.pan
                 partner.aget = is_agent
                 return existing_user
             group_xml_id = 'base.group_portal' if user_type == 'portal' else 'base.group_user'
@@ -51,7 +51,7 @@ class UserUtility:
                 'company_type': partner_data.partner_type.value,
                 'email': partner_data.email,
                 'phone': partner_data.phone,
-                'vat': partner_data.pan,
+                'l10n_in_pan': partner_data.pan,
                 'country_id': country.id if country else False,
                 'state_id': state.id if state else False,
                 'agent': is_agent
