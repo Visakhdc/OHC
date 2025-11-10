@@ -5,9 +5,11 @@
     'description': "This module is automatically adding TDS to the vendor bill",
     'category': 'Accounting',
     'version': '0.1',
-    'depends': ['base','account'],
+    'depends': ['base','account', 'l10n_in_withholding','report_xlsx'],
     'data': [
         'security/ir.model.access.csv',
+        'report/report_action.xml',
+        'wizard/tds_vendor_report_wizard.xml',
         'views/tds_records_view.xml',
         'views/account_move_views.xml',
     ],
