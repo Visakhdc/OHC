@@ -1,14 +1,15 @@
 from odoo.http import request
 from .product_category import CategoryUtility
 
+
 class ProductUtility:
 
     @classmethod
-    def get_or_create_product(cls,user_env, product_data):
-        """Retrieve or create product"""
+    def get_or_create_product(cls, user_env, product_data):
+        """Retrieve or create product, handle archive/unarchive logic"""
         try:
             product_product_model = user_env['product.product']
-            product = product_product_model.search([('x_care_id', '=', product_data.x_care_id)], limit=1)
+            product = product_product_model.with_context(active_test=False).search([('x_care_id', '=', product_data.x_care_id)], limit=1)
             category_data = product_data.category
             tax_list = product_data.taxes
             category = CategoryUtility.get_or_create_category(user_env, category_data)
@@ -18,35 +19,33 @@ class ProductUtility:
             if tax_list:
                 taxes_ids = cls._get_or_create_taxes(user_env, tax_list)
 
-            if not product:
-                product_data_dict = {
-                    'name': product_data.product_name if product_data.product_name else 'New Product',
-                    'x_care_id': product_data.x_care_id,
-                    'list_price': product_data.mrp if product_data.mrp else 0.0,
-                    'standard_price': product_data.cost if product_data.cost else 0.0,
-                    'categ_id': categ_id,
-                    'l10n_in_hsn_code': product_data.hsn
-                }
-                if taxes_ids:
-                    product_data_dict['taxes_id'] = taxes_ids['sale_tax']
-                    product_data_dict['supplier_taxes_id'] = taxes_ids['purchase_tax']
+            product_vals = {
+                'name': product_data.product_name if product_data.product_name else 'New Product',
+                'x_care_id': product_data.x_care_id,
+                'list_price': product_data.mrp or 0.0,
+                'standard_price': product_data.cost or 0.0,
+                'categ_id': categ_id,
+                'l10n_in_hsn_code': product_data.hsn,
+                'active': product_data.active,
+            }
+            if taxes_ids:
+                product_vals.update({
+                    'taxes_id': [(6, 0, taxes_ids['sale_tax'])],
+                    'supplier_taxes_id': [(6, 0, taxes_ids['purchase_tax'])],
+                })
 
-                product = product_product_model.create(product_data_dict)
+            if not product:
+                product = product_product_model.create(product_vals)
             else:
-                product.name = product_data.product_name
-                product.list_price = product_data.mrp
-                product.categ_id = categ_id
-                product.standard_price = product_data.cost
-                if product_data.hsn:
-                    product.l10n_in_hsn_code = product_data.hsn
-                if taxes_ids:
-                    product.taxes_id = taxes_ids['sale_tax']
-                    product.supplier_taxes_id = taxes_ids['purchase_tax']
+                product.write(product_vals)
+
+            if product.product_tmpl_id and product.product_tmpl_id.active != product_data.active:
+                product.product_tmpl_id.active = product_data.active
 
             return product
 
         except Exception as e:
-            return {str(e)}
+            raise Exception(f"{str(e)}")
 
     @classmethod
     def _get_or_create_taxes(cls, user_env, tax_list):
@@ -69,12 +68,16 @@ class ProductUtility:
                             'amount': tax_data.tax_percentage,
                             'type_tax_use': tax_type,
                         })
-                    (sale_tax_ids if tax_type == 'sale' else purchase_tax_ids).append(existing_tax.id)
-            taxes_dict = {
+
+                    if tax_type == 'sale':
+                        sale_tax_ids.append(existing_tax.id)
+                    else:
+                        purchase_tax_ids.append(existing_tax.id)
+
+            return {
                 "purchase_tax": purchase_tax_ids,
-                "sale_tax": sale_tax_ids
+                "sale_tax": sale_tax_ids,
             }
-            return taxes_dict
 
         except Exception as e:
-            raise {str(e)}
+            raise Exception(f"{str(e)}")

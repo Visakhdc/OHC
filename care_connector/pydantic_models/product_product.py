@@ -13,3 +13,4 @@ class ProductData(BaseModel):
     category: CategoryData
     taxes : list[TaxData] | None = None
     hsn: str | None = None
+    active: bool
