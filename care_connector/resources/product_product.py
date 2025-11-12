@@ -12,6 +12,7 @@ class ProductUtility:
             product = product_product_model.with_context(active_test=False).search([('x_care_id', '=', product_data.x_care_id)], limit=1)
             category_data = product_data.category
             tax_list = product_data.taxes
+            status = product_data.status.value if product_data.status else None
             category = CategoryUtility.get_or_create_category(user_env, category_data)
             categ_id = category.id if category else None
 
@@ -26,8 +27,10 @@ class ProductUtility:
                 'standard_price': product_data.cost or 0.0,
                 'categ_id': categ_id,
                 'l10n_in_hsn_code': product_data.hsn,
-                'active': product_data.active,
             }
+            if status:
+                product_vals['active'] = status
+
             if taxes_ids:
                 product_vals.update({
                     'taxes_id': [(6, 0, taxes_ids['sale_tax'])],
@@ -39,8 +42,11 @@ class ProductUtility:
             else:
                 product.write(product_vals)
 
-            if product.product_tmpl_id and product.product_tmpl_id.active != product_data.active:
-                product.product_tmpl_id.active = product_data.active
+            if product.product_tmpl_id:
+                if status == 'active' and product.product_tmpl_id.active == False:
+                    product.product_tmpl_id.active = True
+                elif status == 'retired' and product.product_tmpl_id.active == True:
+                    product.product_tmpl_id.active = False
 
             return product
 
