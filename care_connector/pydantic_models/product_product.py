@@ -9,6 +9,7 @@ class TaxData(BaseModel):
 class ProductStatus(Enum):
     active = 'active'
     retired = 'retired'
+    draft = 'draft'
 
 class ProductData(BaseModel):
     product_name : str
