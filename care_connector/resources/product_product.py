@@ -29,6 +29,7 @@ class ProductUtility:
                 'l10n_in_hsn_code': product_data.hsn,
             }
             if status:
+                status = 'active' if status in ['active', 'draft'] else status
                 product_vals['active'] = status
 
             if taxes_ids:
