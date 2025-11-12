@@ -1,9 +1,14 @@
 from pydantic import BaseModel
 from .product_category import CategoryData
+from enum import Enum
 
 class TaxData(BaseModel):
     tax_name: str
     tax_percentage : float
+
+class ProductStatus(Enum):
+    active = 'active'
+    retired = 'retired'
 
 class ProductData(BaseModel):
     product_name : str
@@ -13,4 +18,4 @@ class ProductData(BaseModel):
     category: CategoryData
     taxes : list[TaxData] | None = None
     hsn: str | None = None
-    active: bool
+    status: ProductStatus | None = None
