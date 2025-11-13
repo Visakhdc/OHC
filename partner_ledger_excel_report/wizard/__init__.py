@@ -1,1 +1,1 @@
-from . import inherit_common_partner_report
+from . import partner_ledger_report
