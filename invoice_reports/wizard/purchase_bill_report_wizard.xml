@@ -4,7 +4,7 @@
         <field name="name">vendor.bill.excel.wizard</field>
         <field name="model">vendor.bill.excel.wizard</field>
         <field name="arch" type="xml">
-            <form string="Vendor Bill Excel Report">
+            <form string="Vendor Bill Report">
                 <group col="4">
                     <field name="date_from"/>
                     <field name="date_to"/>
@@ -19,7 +19,7 @@
     </record>
 
     <record id="action_vendor_bill_report" model="ir.actions.act_window">
-        <field name="name">Vendor Bill Excel Wizard</field>
+        <field name="name">Vendor Bill Report</field>
         <field name="res_model">vendor.bill.excel.wizard</field>
         <field name="type">ir.actions.act_window</field>
         <field name="view_mode">form</field>
