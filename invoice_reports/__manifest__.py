@@ -5,7 +5,7 @@
     'description': "This module allows users to generate and export invoice reports directly into Excel format",
     'category': 'Accounting',
     'version': '0.1',
-    'depends': ['base','account','base_accounting_kit',],
+    'depends': ['base','account','base_accounting_kit',"l10n_in"],
     'data': [
         'security/ir.model.access.csv',
         'wizard/hsn_invoice_report_wizard.xml',
