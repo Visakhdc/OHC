@@ -28,9 +28,6 @@ class ProductUtility:
                 'categ_id': categ_id,
                 'l10n_in_hsn_code': product_data.hsn,
             }
-            if status:
-                status = 'active' if status in ['active', 'draft'] else status
-                product_vals['active'] = status
 
             if taxes_ids:
                 product_vals.update({
@@ -43,11 +40,11 @@ class ProductUtility:
             else:
                 product.write(product_vals)
 
-            if product.product_tmpl_id:
-                if status == 'active' and product.product_tmpl_id.active == False:
-                    product.product_tmpl_id.active = True
-                elif status == 'retired' and product.product_tmpl_id.active == True:
+            if product.product_tmpl_id and status:
+                if status == 'retired' and product.product_tmpl_id.active:
                     product.product_tmpl_id.active = False
+                elif status in ['draft', 'active'] and not product.product_tmpl_id.active:
+                    product.product_tmpl_id.active = True
 
             return product
 

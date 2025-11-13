@@ -9,8 +9,9 @@ class PartnerUtility:
             res_partner_model = user_env['res.partner']
             country_model = user_env['res.country']
             state_model = user_env['res.country.state']
-            res_partner = res_partner_model.search([('x_care_id', '=', partner_data.x_care_id)], limit=1)
+            res_partner = res_partner_model.with_context(active_test=False).search([('x_care_id', '=', partner_data.x_care_id)], limit=1)
             is_agent = True if partner_data.agent == True else False
+            status = partner_data.status.value if partner_data.status else None
             if not res_partner:
                 country = country_model.search([('code', '=', 'IN')], limit=1)
                 state = state_model.search([
@@ -36,6 +37,12 @@ class PartnerUtility:
                 res_partner.vat = partner_data.pan
                 res_partner.phone = partner_data.phone
                 res_partner.agent = is_agent
+
+            if status:
+                if status == 'retired' and res_partner.active:
+                    res_partner.active = False
+                elif status in ['draft', 'active'] and not res_partner.active:
+                    res_partner.active = True
 
             return res_partner
 
